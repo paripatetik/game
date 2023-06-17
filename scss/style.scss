@@ -1,0 +1,488 @@
+@use "sass:math";
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:regular,600,700&display=swap'); 
+@import url('https://fonts.googleapis.com/css?family=Manrope:regular,700&display=swap');
+
+
+@import url('https://fonts.googleapis.com/css2?family=Kablammo&family=Source+Code+Pro:wght@400;700&display=swap');
+
+$fontfamily: 'Source Code Pro', monospace;
+
+
+//===========================================================================================================================
+
+//EM
+@function em($px, $current: 16) {
+	$result: math.div($px, $current) + em;
+	@return $result;
+}
+//adaptive value
+@mixin adaptiveValue($property, $startSize, $minSize, $widthFrom: $containerWidth, $widthTo: $minWidth, $keepSize: 0) {
+	@if ($widthFrom == $containerWidth and $maxWidthContainer == 0) {
+		$widthFrom: $maxWidth;
+	}
+	@if ($minSize <= 0) {
+		$minSize: 0.0001;
+	}
+	@if ($startSize <= 0) {
+		$startSize: 0.0001;
+	}
+
+	// Брейк-поинты в EM
+	$widthFromMedia: em($widthFrom);
+	$widthToMedia: em($widthTo);
+
+	// Формула плавающего значения
+	// Источник: https://css-tricks.com/linearly-scale-font-size-with-css-clamp-based-on-the-viewport/
+	$slope: math.div(($startSize - $minSize), ($widthFrom - $widthTo));
+	$yIntersection: -$widthTo * $slope + $minSize;
+	$flyValue: #{rem($yIntersection)}" + " #{$slope * 100}vw;
+
+	// Получение значения свойства
+	$propertyValue: #{"clamp(" rem($minSize) "," $flyValue "," rem($startSize) ")"};
+	// Если отрицательные значения
+	@if ($minSize > $startSize) {
+		$propertyValue: #{"clamp(" rem($startSize) "," $flyValue "," rem($minSize) ")"};
+	}
+
+	@if $widthFrom == $containerWidth or $widthFrom == $maxWidth or $keepSize == 1 or $keepSize == 2 {
+		@media (min-width: $widthFromMedia) {
+			#{$property}: rem($startSize);
+		}
+	}
+	@media (min-width: $widthToMedia) and (max-width: $widthFromMedia) {
+		#{$property}: $propertyValue;
+	}
+	@if $widthTo == $minWidth or $keepSize == 1 or $keepSize == 3 {
+		@media (max-width: $widthToMedia) {
+			#{$property}: rem($minSize);
+		}
+	}
+}
+
+//===========================================================================================================================
+$minWidth: 320;
+// Ширина полотна (макета)
+$maxWidth: 1400;
+// Ширина ограничивающего контейнера (0 = нет ограничения)
+$maxWidthContainer: 1201;
+
+$containerPadding: 30;
+
+// Ширина страбатывания первого брейкпоинта
+$containerWidth: $containerPadding + $maxWidthContainer;
+
+// break-points
+$pc: em($containerWidth); // ПК, ноутбуки, некоторые планшеты в горизонтальном положении
+$tablet: em(991.98); // Планшеты, некоторые телефоны в горизонтальном положении
+$mobile: em(767.98); // Телефоны L
+$mobileSmall: em(479.98); // Телефоны S
+//</variables>
+
+//===========================================================================================================
+.wrapper {
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	// Прижимаем footer
+	> main {
+		flex: 1 1 auto;
+	}
+	// Фикс для слайдеров
+	> * {
+		min-width: 0;
+	}
+	}
+//===========================================================================================================
+
+
+
+//<null>===========================================================================================================
+* {
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+
+}
+*,
+*:before,
+*:after {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+:focus,
+:active {
+	outline: none;
+}
+a:focus,
+a:active {
+	outline: none;
+}
+aside,
+nav,
+footer,
+header,
+section {
+	display: block;
+}
+html,
+body {
+	height: 100%;
+	min-width: $minWidth;
+}
+body {
+	line-height: 1;
+	font-family: $fontfamily;
+	-ms-text-size-adjust: 100%;
+	-moz-text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+}
+input,
+button,
+textarea {
+	font-family: $fontfamily;
+}
+input::-ms-clear {
+	display: none;
+}
+button {
+	cursor: pointer;
+	color: inherit;
+	font-size: inherit;
+	background-color: inherit;
+}
+button::-moz-focus-inner {
+	padding: 0;
+	border: 0;
+}
+a {
+	color: inherit;
+	transition: 0.4s ease-in;
+}
+a,
+a:visited {
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: none;
+}
+ul li {
+	list-style: none;
+}
+img {
+	vertical-align: top;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: inherit;
+	font-size: inherit;
+}
+
+//===================================================================
+
+.wrapper__banner {
+	position: absolute;
+    top: 0;
+    left: 0;
+	
+    width: 100vw;
+    height: 100vh;
+	transition: all 0.4s ease;
+	background-color: rgba(14, 13, 13, 0.932);
+	&+div{
+		display: none;
+	}
+	&.active{
+		visibility: hidden;
+		top: -100%;
+		&+div{
+			display: block;
+		}
+	}
+}
+.wrapper__video {
+	position: absolute;
+	width: 100vw;
+    height: 100vh;
+	top: 0;
+	left: 0;
+	z-index: 10;
+	video{
+	top: 10px;
+	left: 10px;
+		position: absolute;
+	width: 250px;
+	background-color: rgb(60, 56, 63);
+	height: 300px;
+	border-radius: 4px;
+	border: 2px solid white;
+	transition: all 0.3s ease;
+	&:hover{
+		transform: scale(1.05);
+		transform: translate(10px, 10px);
+		border-radius: 15px;
+	}
+	@media (max-width:$mobileSmall){
+		max-width: 200px;
+		max-height: 220px;
+  }
+	}
+
+}
+.wrapper__img{
+	z-index: 10;
+	position: absolute;
+	object-fit: cover;
+	right: 10px;
+	bottom: 10px;
+	max-width: 280px;
+	height: 100%;
+	opacity: 1;
+	max-height: 300px;
+	border-radius: 4px;
+	border: 2px solid white;
+	transition: all 0.3s ease;
+	&:hover{
+		transform: scale(1.05);
+		transform: translate(-10px, -10px);
+		border-radius: 15px;
+	}
+}
+.wrapper__title {
+	z-index: 10;
+	margin: 0 auto;
+	position: absolute;
+	font-family: 'Kablammo';
+	color: white;
+	font-size: 50px;
+	top: 30px;
+	left: 50%;
+	width: 300px;
+	transform: translate(-150px);
+	text-align: center;
+}
+.wrapper__btn {
+	position: absolute;
+	top: 41%;
+	left: 50%;
+	transform: translateX(-125px);
+	display: block;
+	z-index: 10;
+    border: 2px solid white;
+    padding: 10px 7px;
+    color: white;
+    font-size: 30px;
+    width: 250px;
+	margin: 0 auto;
+    letter-spacing: 1.3px;
+    overflow: hidden;
+    &:before{
+        transition: all 0.3s ease;
+        z-index: -1;
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        background-color: rgb(27, 27, 33);
+        height: 100%;
+    }
+    &:hover{
+        &:before{
+            left: 0;
+        }
+    }
+}
+.wrapper__game {
+	background-color: rgba(23, 20, 30, 0.79);
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+.game {
+	position: absolute;
+	top: -100%;
+	opacity: 0;
+	left: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 25px;
+	height: 100%;
+	width: 100%;
+	padding: 10px 15px;
+	transition: all 1s ease;
+	&.active{
+		top: 0;
+		opacity: 1;
+	}
+	&.last{
+		left: -100%;
+		opacity: 0;
+	}
+}
+.game__title {
+	margin-top: 10px;
+	margin-bottom: 15px;
+	
+	color: rgb(79, 76, 93);
+	font-family: 'Kablammo';
+	letter-spacing: 1.3px;
+	color: white;
+	@include adaptiveValue("font-size", 28, 18);
+	
+}
+.game__text {
+	color: white;
+	line-height: 1.4;
+	@include adaptiveValue("font-size", 22, 16);
+	max-width: 600px;
+	margin: 0 auto;
+	text-align: center;
+}
+.game__img{
+	object-fit: cover;
+	width: 300px;
+	@media (max-width:$mobile){
+		 min-width: 70%; 
+	}
+	min-height: 320px;
+	max-width: 40%;
+	border-radius: 10px;
+	border: 4px solid black;
+}
+.game__grid {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+	@media (min-width:$mobile){
+		  width: 70%;
+	}
+	@media (min-width:$pc){
+		width: 90%;
+  }
+	gap: 10px;
+	margin-bottom: 10px;
+	justify-content: center;
+}
+.game__option {
+	@media (min-width:$mobileSmall){
+		flex: 0 1 40%;
+	}
+	z-index: 10;
+    border: 2px solid rgb(39, 40, 52);
+    padding: 5px 4px;
+    color: white;
+    font-size: 19px;
+   width: 100%;
+   position: relative;
+   overflow: hidden;
+   &:before{
+	transition: all 0.3s ease;
+	z-index: -1;
+	content: '';
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	background-color: rgb(149, 149, 177);
+	height: 100%;
+}
+&:hover{
+	&:before{
+		left: 0;
+	}
+}
+}
+.game__video{
+	width: 250px;
+	border: 2px solid black;
+	height: 350px;
+	object-fit: cover;
+
+}
+
+.modal-btn {
+	text-decoration: underline;
+	color: white;
+	font-size: 18px;
+	z-index: 10;
+	text-align: center;
+	background-color: transparent;
+}
+
+.modal-close{
+	position: absolute;
+	top: 25px;
+	right: 5%;
+	display: block;
+	
+	width: 25px;
+	height: 30px;
+	&::before, &::after{
+		position: absolute;
+		content: '';
+		width: 30px;
+		height: 3px;
+		top: 12px;
+		left: -4px;
+		background-color: rgb(242, 240, 240);
+	}
+	&::before{
+		transform: rotate(45deg);
+	}
+	&::after{
+		transform: rotate(-45deg);
+	}
+	
+}
+.modal-window {
+	overflow: auto;
+	position: fixed;
+	background-color: rgb(49, 49, 74);
+	padding: 35px 45px;
+	border: 2px solid black;
+	width: 90%;
+	height: 90%;
+	top: 5%;
+	left: 5%;
+	z-index: -1;
+	transform: scale(0);
+	visibility: hidden;
+	transition: all 0.3s ease;
+	line-height: 1.4;
+	&.active{
+		z-index: 111;
+		transform: scale(1);
+		visibility: visible;
+	}
+	h3{
+		text-align: center;
+		font-size: 25px;
+		color: white;
+		margin-bottom: 20px;
+	}
+	p{
+		font-size: 20px;
+		color: rgb(167, 169, 237);
+	}
+	.modal-btn-start{
+		margin: 30px auto 10px auto;
+		display: block;
+		border: 2px solid black;
+		text-align: center;
+		color: white;
+		font-size: 23px;
+		background-color: rgb(54, 53, 95);
+		border-radius: 5px;
+		padding: 5px 8px;
+	}
+}
